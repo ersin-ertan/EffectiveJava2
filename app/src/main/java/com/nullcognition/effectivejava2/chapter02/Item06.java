@@ -5,4 +5,7 @@ package com.nullcognition.effectivejava2.chapter02;
  */
 
 // eliminate obsolete object references
+
+//
+
 public class Item06 {}

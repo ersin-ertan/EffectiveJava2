@@ -35,10 +35,10 @@ public class Item02 {
 	  private final String two;
 
 	  // optional, initialized to defaults
-	  private char   three;
-	  private Object four;
+	  private char   three = 'c';
+	  private Object four  = Object.class;
 
-	  public Item02 build(){ return new Item02(this); }
+	  public Item02 build(){ return new Item02(this); } // when the optional parameters are not set, will use fields initialized values
 
 	  public Builder(int inOne, String inTwo){
 
