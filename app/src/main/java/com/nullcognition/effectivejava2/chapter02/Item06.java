@@ -1,6 +1,11 @@
 package com.nullcognition.effectivejava2.chapter02;
 
+import android.support.annotation.NonNull;
+
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EmptyStackException;
+import java.util.WeakHashMap;
 
 /**
  * Created by ersin on 18/04/15 at 8:02 PM
@@ -15,7 +20,67 @@ import java.util.EmptyStackException;
 
 public class Item06 {
 
+   Collection<Client> clientCollection = new ArrayList<>();
 
+   public void clientMaker(){
+
+	  for(int i = 0; i < 5; i++){
+		 new Client();
+	  }
+   }
+
+   public void clientDestroyer(){
+
+	  clientCollection.clear();
+   }
+
+}
+
+interface SomeCallbackListener {
+
+   void someMethod(int i);
+}
+
+enum SomeService {
+   INSTANCE;
+
+   // private SomeCallback registeredCallback; not used, is hard reference
+   WeakHashMap<Integer, SomeCallbackListener> weakHashMap = new WeakHashMap<>();
+
+   public boolean setRegisteredListener(@NonNull SomeCallbackListener inListener){
+
+	  int callbacksHashCode = inListener.hashCode();
+	  if(! weakHashMap.containsKey(callbacksHashCode)){
+		 weakHashMap.put(callbacksHashCode, inListener);
+		 return true;
+	  }
+	  return false;
+   }
+
+   public void updateListenersIValue(int i){
+
+	  for(SomeCallbackListener _weakHashMapValue : weakHashMap.values()){ // dead key should not yield up their values
+		 _weakHashMapValue.someMethod(i);
+	  }
+   }
+}
+
+class Client implements SomeCallbackListener {
+
+   private        int         i;
+   private static SomeService someService;
+   private        boolean     isRegistered;
+
+   static{
+	  someService = SomeService.INSTANCE;
+   }
+
+   { // no need to deregister from service, when this object is garbage collected the garbage collector will clean it from the WeakHashMap
+	  isRegistered = someService.setRegisteredListener(this);
+   }
+
+   @Override
+   public void someMethod(int i){ this.i = i;}
 }
 
 class CappedStack {
