@@ -1,5 +1,8 @@
 package com.nullcognition.effectivejava2.chapter02;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * Created by ersin on 18/04/15 at 8:01 PM
  */
@@ -20,4 +23,35 @@ public class Item01 {
 
    // an example of static factory with the boxed primitive class
    public static Boolean valueOf(boolean b){ return b ? Boolean.TRUE : Boolean.FALSE; }
+}
+
+interface Service {
+
+   void doServiceStuff();
+}
+
+interface Provider {
+
+   Service newService();
+}
+
+class Services {
+
+   private static final Map<String, Provider> providers             = new ConcurrentHashMap<>();
+   public static final  String                DEFAULT_PROVIDER_NAME = "<def>";
+
+   private Services(){} // uninstantiable
+
+   public static void registerDefaultProvider(Provider p){registerProvider(DEFAULT_PROVIDER_NAME, p);}
+
+   public static void registerProvider(String name, Provider p){providers.put(name, p);}
+
+   public static Service newInstance(){ return newInstance(DEFAULT_PROVIDER_NAME); }
+
+   public static Service newInstance(String name){
+
+	  Provider p = providers.get(name);
+	  if(p == null){throw new IllegalArgumentException("no provdier registered with name:" + name);}
+	  return p.newService();
+   }
 }
