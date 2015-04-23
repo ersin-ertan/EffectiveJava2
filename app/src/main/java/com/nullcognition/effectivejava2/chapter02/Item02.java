@@ -82,3 +82,47 @@ interface Builder <T> {
 
    T build();
 }
+
+class TelescopingConstructor {
+
+   int i, c, d, e;
+
+   TelescopingConstructor(int i){this.i = i;}
+
+   TelescopingConstructor(int i, int c){
+	  this.i = i;
+	  this.c = c;
+   }
+
+   TelescopingConstructor(int i, int c, int d){
+	  this.i = i;
+	  this.c = c;
+	  this.d = d;
+   }
+
+   TelescopingConstructor(int i, int c, int d, int e){
+	  this.i = i;
+	  this.c = c;
+	  this.d = d;
+	  this.e = e;
+   }
+   // TelescopingConstructor(int i, int c, int e){} // three int argument already defined
+}
+
+// leaves class construction in inconsistent state
+class JavaBean {
+
+   int required;
+   int a = 1; // sensible default
+   long   b; // optional
+   String c;
+
+   JavaBean(int required){this.required = required;}
+
+   public void setA(int a){this.a = a;}
+
+   public void setB(long b){this.b = b;}
+
+   public void setC(String c){this.c = c;}
+
+}
