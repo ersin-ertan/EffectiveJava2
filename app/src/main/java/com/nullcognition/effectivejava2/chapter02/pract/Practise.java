@@ -1,4 +1,4 @@
-package com.nullcognition.effectivejava2.chapter02;
+package com.nullcognition.effectivejava2.chapter02.pract;
 
 /**
  * Created by ersin on 21/04/15 at 11:30 PM
