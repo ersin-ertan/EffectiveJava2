@@ -15,6 +15,10 @@ public class I01{
 
 	private I01(boolean initBool){}
 
+	// new... can be parameterized ex. string, such that a backing concurrent data structure can test for containment
+	// creating and returning a service based on the the parameter, assuming the service is registered with the
+	// factory class
+
 	public static I01 newIO1(boolean canTakeInVariables){
 		if(canTakeInVariables){
 			initBool_callDate.put(initBool_callCounter++, new Date());

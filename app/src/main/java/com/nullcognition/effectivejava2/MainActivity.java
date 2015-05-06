@@ -18,28 +18,18 @@ public class MainActivity extends ActionBarActivity{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		testI01TryFinallyReturn();
+		pract00();
+
 
 		int i = 0; // debug point
 	}
 
-	private void testPract00(){
-		I01 i01 = I01.newIO1(true);
-		Log.e("logErr", "s is " + i01.s); // "init"
-		Log.e("logErr", "s is " + i01.getString()); // "returning"
-		Log.e("logErr", "s is " + i01.s); // "new ref" after return finally changes s
+	private void pract00(){
+
+//		Pract00.testI01();
+//		Pract00.testI01TryFinallyReturn();
+		Pract00.testI02Builder();
 	}
 
-	private void testI01TryFinallyReturn(){
-		I01 i01 = I01.newIO1(true);
-		Log.e("logErr", "s is " + i01.s); // "init"
-		if(i01.tryFinally().equals("try")){
-			Log.e("logErr", "s is " + "try"); // testing to see if "try" was ever seen
-		}
-		Log.e("logErr", "s is " + i01.tryFinally()); // "finally" after return finally changes s
-		Log.e("logErr", "s is " + i01.s); // "new ref" after return finally changes s
 
-		// testing try did not work, check for stack based interception methods from i01's call stack
-
-	}
 }
