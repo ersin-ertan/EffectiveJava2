@@ -27,6 +27,10 @@ import java.util.List;
 //    don't do this public boolean equals(MyClass o) {
 //    using the MyClass instead of object in not sufficient for @Override -ing the equals method
 
+// == to check if the argument is a reference to the same object
+// instanceof to check if the argument has the correct type
+// if prior succeeds, cast the argument to the correct type, check that each significant field matches the equals
+
 
 public class Item08 {
 
@@ -58,7 +62,7 @@ public class Item08 {
 //        }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(Object o) { // remember that equals argument is an object, else the method is not overridden
             return o instanceof CaseInsensitiveString && ((CaseInsensitiveString) o).s.equalsIgnoreCase(s); // one return statement with boolean logic
         }
     }
