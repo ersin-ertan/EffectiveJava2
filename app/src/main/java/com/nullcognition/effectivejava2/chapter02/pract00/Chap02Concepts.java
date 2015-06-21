@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.WeakHashMap;
 
 public class Chap02Concepts{
 
@@ -242,3 +243,80 @@ class FighterRobot{
 		}
 	}
 }
+
+// Singleton with observer pattern, memory safe with WeakHashMap
+enum PubSub{ // default public static final, methods are default public static
+	INSTANCE;
+
+	// Question, should the pubHashMap be of Integer(as the hashcode), WeakHashMap<> or of Publisher, WeakHashMap<>
+	// find out why the subHashMap uses it for the answer
+	static WeakHashMap<Publisher, ArrayList<Subscriber>> pubHashMapOfListOfSubs = new WeakHashMap<>();
+	static WeakHashMap<Integer, Subscriber> subHashMap = new WeakHashMap<>();
+
+	void registerSubscriber(Subscriber callback, Publisher publisher){
+		int callbackHash = callback.hashCode();
+		// has this sub existed before for any other pub
+		if(!subHashMap.containsKey(callbackHash)){
+			subHashMap.put(callbackHash, callback);
+		}
+		ArrayList pubsSubArrayList = pubHashMapOfListOfSubs.get(publisher);
+		if(!pubsSubArrayList.contains(callback)){
+			pubsSubArrayList.add(callback);
+		}// when a sub is not referenced by any list, then it will get gc'd
+	}
+
+	// no need to deregister, when the value in the callback is null(no longer reachable it gets gc'd)
+	void setValues(int value, Publisher publisher){
+		for(Subscriber s : pubHashMapOfListOfSubs.get(publisher)){
+			s.setValue(value);
+		}
+	}
+
+	// but you may want to deregister/un sub if you no longer want updates
+	void unregisterSubscriber(Subscriber sub, Publisher pub){ // unregister from specified pub
+		pubHashMapOfListOfSubs.get(pub).remove(sub);
+	}
+
+	void unregisterSubscriber(Subscriber sub){ // unregisters from all pubs
+		for(WeakHashMap.Entry<Publisher, ArrayList<Subscriber>> e : pubHashMapOfListOfSubs.entrySet()){
+			e.getValue().remove(sub);
+		}
+	}
+}
+
+interface Subscriber{
+	void setValue(final int value);
+}
+
+interface Publisher{
+	void setValues(final int value);
+}
+
+class Sub implements Subscriber{
+
+	//	boolean isRegistered = false; // obsolete, deregistration does not unregister, thus you can't know when to toggle this variable
+	private int i = 0;
+	public int getI(){ return i; }
+
+	@Override
+	public void setValue(final int value){i = value;}
+
+	public void registerToPublisher(final Publisher publisher){
+		PubSub.INSTANCE.registerSubscriber(this, publisher);
+	}
+
+	public void unregisterFromPublisher(final Publisher publisher){
+		PubSub.INSTANCE.unregisterSubscriber(this, publisher);
+	}
+
+	public void unregisterFromAllPublishers(){ PubSub.INSTANCE.unregisterSubscriber(this);}
+}
+
+class Pub implements Publisher{
+
+	@Override
+	public void setValues(final int value){
+		PubSub.INSTANCE.setValues(value, this);
+	}
+}
+
