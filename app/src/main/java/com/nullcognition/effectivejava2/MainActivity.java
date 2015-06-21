@@ -28,7 +28,8 @@ public class MainActivity extends ActionBarActivity{
 
 //		Pract00.testI01();
 //		Pract00.testI01TryFinallyReturn();
-		Pract00.testI02Builder();
+//		Pract00.testI02Builder();
+
 	}
 
 

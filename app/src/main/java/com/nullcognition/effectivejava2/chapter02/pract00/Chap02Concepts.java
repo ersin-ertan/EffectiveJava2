@@ -1,5 +1,7 @@
 package com.nullcognition.effectivejava2.chapter02.pract00;// Created by ersin on 19/06/15
 
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,8 +28,100 @@ public class Chap02Concepts{
 		SingletonChanger.INSTANCE.applyModification(SingletonChanger.INSTANCE.getExD());
 	}
 
+	public void testDereferencingObjects(){
+		// looking into the linked list code from the remove, LinkIterator<ET> implements ListIterator<ET>
+		// which is doing the removal and the nullification
+		List<Object> list = new LinkedList<Object>();
+		Object toRemove = new Object();
+		list.add(toRemove);
+		list.remove(toRemove);
+
+	}
+
 
 	// ------------------------------ Implementation ------------------------------
+
+	// memory managed code must null its de-referenced memory
+	interface TFactory<T>{
+		T T();
+		T[] T(int size);
+	}
+
+	public class ManagedMemory<T>{
+		private static final int SIZE = 3;
+		private int nextEmpty = 0;
+		T[] array;
+		public ManagedMemory(TFactory<T> factoryOfType){
+			array = factoryOfType.T(SIZE);
+			// Can't instantiate object of type T, so no new T();
+		}
+
+		public int capacity(){return SIZE;}
+		public int size(){return nextEmpty;}
+		// will be +1 the index of the object, when pushing using post, popping use pre index modification
+
+		public void push(T element){
+			if(nextEmpty < SIZE){
+				array[nextEmpty++] = element;
+				return;
+			}
+			throw new IndexOutOfBoundsException("push error, at capacity");
+		}
+		public T unSafePop(){
+			if(nextEmpty > 0){ return array[--nextEmpty]; }
+			throw new IndexOutOfBoundsException();
+		}
+		public T safePop(){
+			if(nextEmpty > 0){
+				T temp = array[--nextEmpty]; // object is no longer in memory
+				array[nextEmpty] = null;
+				return temp;
+			}
+			throw new IndexOutOfBoundsException();
+		}
+		// or use weak references, untested
+		// a similar concept is shown in item06 with the WeakHashMap<Integer, CallbackListener> and the observer/sub pattern
+		// where the de-registration from an object is not needed since the observer will get gc'd if null, and will yield null objects if
+		//polled but yet to gc
+		WeakReference<T>[] weakReferences = new WeakReference[SIZE];
+		public void pushWR(T element){
+			if(nextEmpty < SIZE){
+				weakReferences[nextEmpty++] = new WeakReference<T>(element); // new weakreference needed as there is no set, since the gc collects these objects, or does it only collect the referent? and pools the WR?
+				return;
+			}
+			throw new IndexOutOfBoundsException("push error, at capacity");
+		}
+		public T popWR(){
+			if(nextEmpty > 0){
+				T temp = weakReferences[--nextEmpty].get();
+				weakReferences[nextEmpty].clear();
+				return temp;
+			}
+			throw new IndexOutOfBoundsException();
+		}
+	}
+
+	// ---------- experimentation: try putting the weakReference in the TFactory ----------
+	interface WRFactory<T>{
+		WeakReference<T> newWeaklyReferenced();
+		WeakReference<T>[] newWealkyReferencedArray(int size);
+	}
+
+	class TestingWRFactory<TT>{
+		public TT popWRObject(WRFactory<TT> wrFactory){ // do we want to be giving the referent type or a WR
+			TT temp = wrFactory.newWeaklyReferenced().get();
+			wrFactory.newWeaklyReferenced().clear();
+			return temp;
+		}
+		public TT[] WRArray(WRFactory<TT> wrFactory, int size){ // elegant, don't know if this does anything useful...
+			List<TT> array = new ArrayList<>(size);
+			WeakReference<TT>[] wrA = wrFactory.newWealkyReferencedArray(size);
+			for(int i = 0; i < size; i++){
+				array.add(i, wrA[i].get());
+			}
+			return (TT[]) array.toArray();
+		}
+	} // --------------------------------------------------------------------------------
 
 	// static factory methods with internal tracking
 	static class OneBeforeMe{
@@ -79,15 +173,15 @@ public class Chap02Concepts{
 }
 
 class LengthyCalculations{
-	static{
-		lengthyComputationalValue = 1 + 1 + 1 + 1;
-	}
+	static{lengthyComputationalValue = 1 + 1 + 1 + 1;}
+
 	// only calculated once and incurs an upfront cost, useful for objects being created rapidly and
 	// needing the value
 	public static final int lengthyComputationalValue;
 
 	// calculation is differed to time of call,
 	{List someList = computeLazyValue();}
+
 	public List computeLazyValue(){
 		if(lazyComputationalValue == null){
 			lazyComputationalValue = new LinkedList();
@@ -123,7 +217,7 @@ class FighterRobot{
 		private int arms = DEFAULT_ARMS;
 		private int chassis = DEFAULT_CHASSIS;
 
-		public Builder(){}
+		public Builder(){} // no need to force parameters on constructor, sensible defaults are selected if none of the builder methods are called
 		public FighterRobot build(){return new FighterRobot(this);}
 		// viable if there are few parameters, better to use pre-set configs
 		public FighterRobot buildBest(){return new FighterRobot(new Builder().appendages(99, 99).chassis(99));}
