@@ -20,6 +20,11 @@ public class Chap02Concepts{
 		fighterRobot = new FighterRobot.Builder().buildBest();
 		fighterRobot = new FighterRobot.Builder().buildBestA();
 		fighterRobot = new FighterRobot.Builder().buildWorst();
+
+		fighterRobot = new FighterRobot.Builder().buildFighter01(); // what is the point of having the factory if you can't build by type
+		// in the client code...
+		fighterRobot = new FighterRobot.Builder().buildFighter00();
+
 	}
 
 	public void testSingletonChanger(){
@@ -217,6 +222,9 @@ class FighterRobot{
 		private int legs = DEFAULT_LEGS;
 		private int arms = DEFAULT_ARMS;
 		private int chassis = DEFAULT_CHASSIS;
+		private static final int KILLER = 485; // the question is, should the type be a part of the builder or part of the factory
+		// I'm liking the factory, for containment, but the syntax for builder is much cleaner... but then again, why are we using builder
+		// when we could just use factory at top level?
 
 		public Builder(){} // no need to force parameters on constructor, sensible defaults are selected if none of the builder methods are called
 		public FighterRobot build(){return new FighterRobot(this);}
@@ -224,6 +232,10 @@ class FighterRobot{
 		public FighterRobot buildBest(){return new FighterRobot(new Builder().appendages(99, 99).chassis(99));}
 		public FighterRobot buildBestA(){return new FighterRobot(FighterRobotPresets.best());}
 		public FighterRobot buildWorst(){return new FighterRobot(FighterRobotPresets.worst());}
+		public FighterRobot buildBuilder00(){return new FighterRobot(FighterRobotFactory.newBuilder(KILLER));}
+		public FighterRobot buildBuilder01(){return new FighterRobot(FighterRobotFactory.newBuilder(FighterRobotFactory.DESTROYER));}
+		public FighterRobot buildFighter00(){return FighterRobotFactory.newFighter(KILLER);}
+		public FighterRobot buildFighter01(){return FighterRobotFactory.newFighter(FighterRobotFactory.DESTROYER);}
 
 		public Builder appendages(int armType, int legType){
 			arms = armType;
@@ -240,6 +252,30 @@ class FighterRobot{
 		private static class FighterRobotPresets{
 			private static Builder best(){return new Builder().appendages(99, 99).chassis(99);}
 			private static Builder worst(){return new Builder().appendages(0, 0).chassis(0);}
+		}
+
+		// use a factory for distribution
+		private static class FighterRobotFactory{
+			private static final int DESTROYER = 315; // put here or in the builder class?
+			public static Builder newBuilder(int type) {
+				switch(type){
+					case DESTROYER:
+						return new Builder().appendages(62, 13).chassis(79);
+					case KILLER:
+						return new Builder().appendages(23, 67).chassis(66);
+					default:
+						return new Builder(); // throw new Exception(); should be this
+				}
+			}
+			public static FighterRobot newFighter(int type){
+				switch(type){
+					case DESTROYER:
+						return new FighterRobot(new Builder().appendages(62, 13).chassis(79));
+					case KILLER:
+						return new FighterRobot(new Builder().appendages(23, 67).chassis(66));
+					default:
+						return new FighterRobot(); // throw new Exception(); should be this
+				}			}
 		}
 	}
 }
