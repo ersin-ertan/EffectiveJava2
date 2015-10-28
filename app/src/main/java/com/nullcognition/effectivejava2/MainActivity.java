@@ -1,13 +1,12 @@
 package com.nullcognition.effectivejava2;
 
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 
-import com.nullcognition.effectivejava2.chapter02.pract.I01;
-import com.nullcognition.effectivejava2.chapter02.pract.Pract00;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 
 public class MainActivity extends ActionBarActivity{
@@ -18,10 +17,8 @@ public class MainActivity extends ActionBarActivity{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		pract00();
+//		pract00();
 
-
-		int i = 0; // debug point
 	}
 
 	private void pract00(){
